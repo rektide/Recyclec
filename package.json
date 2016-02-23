@@ -1,22 +1,29 @@
 {
-  "name": "recyclec",
-  "version": "1.0.0",
-  "description": "",
-  "main": "recyclec.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://archive.voodoowarez.com/recyclec"
-  },
-  "author": "rektide",
-  "license": "X",
-  "dependencies": {
-    "@cycle/core": "^6.0.3",
-    "line-stream": "^1.0.0",
-    "rx": "^4.0.8",
-    "rx-node": "^1.0.2",
-    "ttys": "0.0.3"
-  }
+	"name": "recyclec",
+	"version": "1.0.0",
+	"description": "Cycle-js Command-line driver & transformer utility",
+	"main": "recyclec.js",
+	"tags": [
+		"oneline",
+		"cli",
+		"cycle.js",
+		"driver",
+		"rx"
+	],
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://archive.voodoowarez.com/recyclec"
+	},
+	"author": "rektide",
+	"license": "X",
+	"dependencies": {
+		"@cycle/core": "^6.0.3",
+		"line-stream": "^1.0.0",
+		"rx": "^4.0.8",
+		"rx-node": "^1.0.2",
+		"ttys": "0.0.3"
+	}
 }
