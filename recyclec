@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+"use strict"
+
+var
+  rx= require("rx"),
+  ttys= require("ttys"),
+  linestream= require("line-stream")
+
+// source: input (read) effects
+// sink: output (write) effecs, 
+// - _Generalizing run() fn_ video
+
+// take sink (to describe write), 
+// return souces (to catch reads), 
+// - https://cycle.js.org/drivers
+const function lineDriver(output){
+	output.subscribe(l=> process.stdout.write(l, "utf8"), null, ()=> process.stdout.close())
+	var
+	  lines= linestream(),
+	  input= RxNode.fromTransformStream(lines)
+	process.stdin.pipe(lines)
+	return {
+		input
+	}
+}
+
+const function main(sources){
+	var
+	  transform= require(process.argv[2]),
+	  input= sources.input,
+	  output= input.selectMany(line => transform(line))
+	return {
+		output
+	}
+}
+
+module.exports.driver= driver
