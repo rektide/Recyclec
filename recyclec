@@ -17,15 +17,19 @@ process.stdin.setEncoding("utf8")
 // take sink (to describe write), 
 // return souces (to catch reads), 
 // - https://cycle.js.org/drivers
-function lineDriver(output){
-	output.subscribe(l=> {
-			process.stdout.write(l, "utf8")
-		}, null, ()=> process.stdout.end())
-	let
+function makeLineDriver(opts){
+	let	
+	  stdout= opts && opts.stdout || process.stdout,
+	  stdin= opts && opts.stdin || process.stdin,
 	  lines= linestream(),
 	  input= RxNode.fromTransformStream(lines)
-	process.stdin.pipe(lines)
-	return input
+	stdin.setEncoding("utf8")
+	stdin.setDefaultEncoding("utf8")
+	stdin.pipe(lines)
+	return function lineDriver(output){
+		RxNode.writeToStream(output, stdout)
+		return input
+	}
 }
 
 function transformMain(sources){
@@ -37,15 +41,41 @@ function transformMain(sources){
 		line: output
 	}
 }
-
 function runTransform(){
-	Cycle.run(transformMain, { line: lineDriver })
+	Cycle.run(transformMain, {
+		line: makeLineDriver()
+	})
 }
 
-module.exports.lineDriver= lineDriver
+
+function interactiveMain(sources){
+	ttys.stdout.setDefaultEncoding("utf8")
+	let
+	  transform= require(process.argv[2]),
+	  input= sources.line,
+	  term= sources.term,
+	  leadingTerm= Rx.Observable.of("y").concat(term),
+	  output= input.map(line=> transform(line)),
+	  questions= output.zip(input, leadingTerm).selectMany(line=> "-"+line[1]+"+"+line[0]),
+	  filtered= output.zip(term).where(pair=> pair[1].toString() != "n\n").map(line=> line[0])
+	return {
+		term: questions,
+		line: filtered
+	}
+}
+function runInteractive(){
+	Cycle.run(interactiveMain, {
+		term: makeLineDriver(ttys),
+		line: makeLineDriver()
+	})
+}
+
+module.exports.makeLineDriver= makeLineDriver
 module.exports.transformMain= transformMain
 module.exports.runTransform = runTransform
+module.exports.interactiveMain= interactiveMain
+module.exports.runInteractive= runInteractive
 
 if(require.main === module){
-	setTimeout(()=> module.exports.runTransform(), 0)
+	setTimeout(()=> runInteractive())
 }
