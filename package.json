@@ -13,7 +13,9 @@
   "author": "rektide",
   "license": "X",
   "dependencies": {
+    "@cycle/core": "^6.0.3",
     "line-stream": "^1.0.0",
+    "rx": "^4.0.8",
     "rx-node": "^1.0.2",
     "ttys": "0.0.3"
   }

@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 "use strict"
 
-var
-  rx= require("rx"),
+let
+  Rx= require("rx"),
+  Cycle= require("@cycle/core"),
+  RxNode= require("rx-node"),
   ttys= require("ttys"),
   linestream= require("line-stream")
+
+process.stdin.setEncoding("utf8")
 
 // source: input (read) effects
 // sink: output (write) effecs, 
@@ -13,25 +17,35 @@ var
 // take sink (to describe write), 
 // return souces (to catch reads), 
 // - https://cycle.js.org/drivers
-const function lineDriver(output){
-	output.subscribe(l=> process.stdout.write(l, "utf8"), null, ()=> process.stdout.close())
-	var
+function lineDriver(output){
+	output.subscribe(l=> {
+			process.stdout.write(l, "utf8")
+		}, null, ()=> process.stdout.end())
+	let
 	  lines= linestream(),
 	  input= RxNode.fromTransformStream(lines)
 	process.stdin.pipe(lines)
-	return {
-		input
-	}
+	return input
 }
 
-const function main(sources){
-	var
+function transformMain(sources){
+	let
 	  transform= require(process.argv[2]),
-	  input= sources.input,
+	  input= sources.line,
 	  output= input.selectMany(line => transform(line))
 	return {
-		output
+		line: output
 	}
 }
 
-module.exports.driver= driver
+function runTransform(){
+	Cycle.run(transformMain, { line: lineDriver })
+}
+
+module.exports.lineDriver= lineDriver
+module.exports.transformMain= transformMain
+module.exports.runTransform = runTransform
+
+if(require.main === module){
+	setTimeout(()=> module.exports.runTransform(), 0)
+}
